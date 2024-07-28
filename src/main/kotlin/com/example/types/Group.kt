@@ -21,6 +21,7 @@ class Group private  constructor(
         val messages = PostgresDb.getMessages(
             """
                 SELECT * FROM MESSAGES
+                WHERE messages.groupid = ${id}
                 ORDER BY id DESC
                 LIMIT $amount
                 OFFSET $offset
@@ -64,20 +65,20 @@ class Group private  constructor(
             it.messageEdited(message)
         }
     }
-    suspend fun inviteUser(sender:User,invitedID:Int){
-        if(isInGroup(invitedID)){
+    suspend fun inviteUser(sender:User,invited:User){
+        if(isInGroup(invited.id)){
             throw BadRequestException("User already in group")
         }
         PostgresDb.transactionNoReturn(
             """
                 INSERT INTO members (userid,groupid)
-                VALUES (${invitedID},${this.id})
+                VALUES (${invited.id},${this.id})
             """.trimIndent()
         )
-        GlobalInfo.users[invitedID]?.user?.groups?.plusAssign(invitedID)
-        members += invitedID
+        GlobalInfo.users[invited.id]?.user?.groups?.plusAssign(invited.id)
+        members += invited.id
         forEachMember {
-            it.userJoined(sender,invitedID,this)
+            it.userJoined(sender,invited.id,this)
         }
     }
     suspend fun kickUser(sender: User, kickedID:Int){
@@ -109,21 +110,26 @@ class Group private  constructor(
         return exists
     }
     suspend fun changeName(user: User, newName:String) {
-        """
-            UPDATE GROUPS
-            SET (name) = ('$newName')
-            WHERE groups.id = $id
-        """.trimIndent()
+        PostgresDb.transactionNoReturn(
+            """
+                UPDATE GROUPS
+                SET (name) = ('$newName')
+                WHERE groups.id = $id
+            """.trimIndent()
+        )
         name = newName
         forEachMember {
             it.groupNameChanged(this)
         }
     }
     suspend fun deleteGroup(){
-        """
-            DELETE FROM groups
-            WHERE groups.id = $id
-        """.trimIndent()
+        PostgresDb.transactionNoReturn(
+            """
+                DELETE FROM groups
+                WHERE groups.id = $id
+            """.trimIndent()
+        )
+
         forEachMember {
             it.groupDeleted(this)
         }
@@ -177,7 +183,7 @@ class Group private  constructor(
                 """.trimIndent()
             )!!
            runBlocking {
-               group.inviteUser(creator,creator.id)
+               group.inviteUser(creator,creator)
            }
            return group
        }

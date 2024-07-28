@@ -1,6 +1,8 @@
 
 ## API Reference
 Basically i duplicated swagger docs here with fixed instance type, but who cares.
+
+If you want to see websocket docs go [here](https://github.com/SAANN3/Message-Server/blob/main/docs/websocket.md) 
 #### Get User info
 
 ```http

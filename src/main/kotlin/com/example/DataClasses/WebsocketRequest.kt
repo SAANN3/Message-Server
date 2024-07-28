@@ -47,7 +47,6 @@ class WebsocketRequests(){
     @WsRequest("GET_GROUP_INFO")
     data class GetGroupInfo(
         val groupId:Int,
-        val offset: Int,
     )
     @Serializable
     @WsRequest("BLOCK_USER")
@@ -88,6 +87,12 @@ class WebsocketRequests(){
         val messageId: Int,
         val text: String,
         val groupId: Int
+    )
+    @Serializable
+    @WsRequest("INVITE_USER")
+    data class InviteUser(
+        val groupId: Int,
+        val userId: Int
     )
 }
 @Serializable

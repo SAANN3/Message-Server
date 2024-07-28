@@ -52,6 +52,7 @@ class WebSocketResponses(){
     @WsResponse("USER_KICKED")
     data class UserKicked(
         val senderId:Int,
+        val groupId: Int,
         val kickedId:Int
     )
     @Serializable
@@ -62,12 +63,12 @@ class WebSocketResponses(){
         val userId: Int
     )
     @Serializable
-    @WsResponse("LEAVE_GROUP")
+    @WsResponse("LEFT_GROUP")
     data class LeaveGroup(
         val groupId: Int
     )
     @Serializable
-    @WsResponse("CREATE_GROUP")
+    @WsResponse("CREATED_GROUP")
     data class CreateGroup(
         val groupId: Int
     )
@@ -84,16 +85,9 @@ class WebSocketResponses(){
     @Serializable
     @WsResponse("GROUP_INFO")
     data class GroupInfo(
-        val users: List<UserInfoShort>,
+        val users: List<Int>,
         val name: String,
         val creationDate: Instant,
-    )
-    @Serializable
-    @WsResponse("GROUP_CREATED")
-    data class  GroupCreated(
-        val users: List<UserInfoShort>,
-        val groupId: Int,
-        val text: String
     )
     @Serializable
     @WsResponse("LOADED_MESSAGES")

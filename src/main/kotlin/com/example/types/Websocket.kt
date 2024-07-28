@@ -64,6 +64,11 @@ class UserWebsocket(
                     user.blockUser(type.userId)
                     sendOk(WebSocketResponses.BlockedUser(type.userId))
                 }
+                WebsocketRequests.getAnnotation(WebsocketRequests.GetGroupInfo::class) -> {
+                    val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.GetGroupInfo>(text)
+                    val group = accessGroup(type.groupId)
+                    sendOk(WebSocketResponses.GroupInfo(group.members,group.name,group.creationDate))
+                }
                 WebsocketRequests.getAnnotation(WebsocketRequests.SendMessage::class) -> {
                     val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.SendMessage>(text)
                     val message = accessGroup(type.groupId).sendMessage(user,type.message)
@@ -79,13 +84,17 @@ class UserWebsocket(
                     val group = Group(user,type.name)
                     GlobalInfo.groups[group.id] = group
                     type.users?.forEach {
-                        group.inviteUser(user, it)
+                        group.inviteUser(user, User(it))
                     }
                     sendOk(WebSocketResponses.CreateGroup(group.id))
                 }
                 WebsocketRequests.getAnnotation(WebsocketRequests.GetUnreadMessages::class) -> {
                     val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.GetUnreadMessages>(text)
                     //TODO
+                }
+                WebsocketRequests.getAnnotation(WebsocketRequests.InviteUser::class) -> {
+                    val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.InviteUser>(text)
+                    accessGroup(type.groupId).inviteUser(user,User(type.userId))
                 }
                 WebsocketRequests.getAnnotation(WebsocketRequests.LeaveChat::class) -> {
                     val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.LeaveChat>(text)
@@ -95,7 +104,7 @@ class UserWebsocket(
                 WebsocketRequests.getAnnotation(WebsocketRequests.KickUser::class) -> {
                     val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.KickUser>(text)
                     accessGroup(type.groupId).kickUser(user,type.userId)
-                    sendOk(WebSocketResponses.UserKicked(user.id,type.userId))
+                    sendOk(WebSocketResponses.UserKicked(user.id,type.userId,type.groupId))
                 }
                 WebsocketRequests.getAnnotation(WebsocketRequests.LoadMessages::class) -> {
                     val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.LoadMessages>(text)
@@ -149,12 +158,13 @@ class UserWebsocket(
         sendOk(WebSocketResponses.UserJoined(senderId.id,userId,group.id))
     }
     suspend fun userLeft(senderId: Int,kickedId:Int,group: Group){
-        sendOk(WebSocketResponses.UserKicked(senderId,kickedId))
+        sendOk(WebSocketResponses.UserKicked(senderId,kickedId,group.id))
     }
     suspend fun userOnlineChanged(user:User,state:Boolean){
         sendOk(WebSocketResponses.UserOnlineChanged(user.id,state))
     }
     suspend fun groupDeleted(group: Group){
+        user.groups -= group.id
         sendOk(WebSocketResponses.GroupDeleted(group.id))
     }
     private suspend inline fun <reified T: Any> sendOk(data:T){
