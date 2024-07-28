@@ -96,7 +96,7 @@ Request body
 ##### Responses
 | Status | Response  |
 | ------ | --------- |
-| 200    |return jwt token <br><pre lang="json">{&#17;6u; "token":"string" &#13;}</pre>|
+| 200    |return jwt token <br><pre lang="json">{&#13; "token":"string" &#13;}</pre>|
 | 400    |User not found|
 
 #### Main websocket
