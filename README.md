@@ -24,6 +24,6 @@ then run server
 
 2: make a docker container with postgres db
 
-3:~~ document websocket in github ~~ and maybe swagger(probably no)
+3:~~document websocket in github~~ and maybe swagger(probably no)
 
 4: Implement unread messages system
