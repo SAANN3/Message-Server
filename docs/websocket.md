@@ -5,7 +5,7 @@
 All requests (messages) should have ```type``` value, it's used for choosing a request type.
 
 If you didn't send ```type``` variable or it's not in the list of allowed you get simillar message.
-```json
+```
 {
     status: "ERR",
     type: "BAD_REQUEST",
@@ -14,7 +14,7 @@ If you didn't send ```type``` variable or it's not in the list of allowed you ge
 }
 ```
 If type is detected, but requested params are not sended, or sended with not right type you get this.
-```json
+```
 {
     status: "ERR",
     type: "BAD_REQUEST",
@@ -25,7 +25,7 @@ If type is detected, but requested params are not sended, or sended with not rig
 Point of this is to check if type exists,and if it was understood by a server.
 
 Here is a response schema, where if status is "OK" then data contains object, related to type
-```json
+```
 {
     status: "OK" or "ERR",
     type: String,
@@ -36,7 +36,7 @@ Here is a response schema, where if status is "OK" then data contains object, re
 
 ## Requests( messages that server can accept)
 #### Send message
-```json
+```
 {
     type: "SEND_MESSAGE",
     groupId: Number,
@@ -45,7 +45,7 @@ Here is a response schema, where if status is "OK" then data contains object, re
 ```
 returns  ```MESSAGE_SENT``` response type
 #### Create group
-```json
+```
 {
     type: "CREATE_GROUP",
     users: Array of numbers or null,
@@ -54,7 +54,7 @@ returns  ```MESSAGE_SENT``` response type
 ```
 returns  ```CREATED_GROUP``` response type
 #### Leave group
-```json
+```
 {
     type: "LEAVE_GROUP",
     groupId: Number
@@ -63,7 +63,7 @@ returns  ```CREATED_GROUP``` response type
 returns  ```LEFT_GROUP``` response type
 #### Load messages
 By default, 30 most new messages are loaded. If, for example offset equals to 1,we return 30 messages after the newest one
-```json
+```
 {
     type: "LOAD_MESSAGES",
     groupId: Number,
@@ -73,13 +73,13 @@ By default, 30 most new messages are loaded. If, for example offset equals to 1,
 returns  ```LOADED_MESSAGES``` response type
 #### Get unread messages
 Not implemented
-```json
+```
 {
     type: "GET_UNREAD_MESSAGES"
 }
 ```
 #### Get group info
-```json
+```
 {
     type: "GET_GROUP_INFO",
     groupId: Number,
@@ -87,7 +87,7 @@ Not implemented
 ```
 returns  ```GROUP_INFO``` response type
 #### Unblock user
-```json
+```
 {
     type: "UNBLOCK_USER",
     userId: Number,
@@ -95,7 +95,7 @@ returns  ```GROUP_INFO``` response type
 ```
 returns  ```USER_UNBLOCKED``` response type
 #### Kick user
-```json
+```
 {
     type: "KICK_USER",
     userId: Number,
@@ -104,7 +104,7 @@ returns  ```USER_UNBLOCKED``` response type
 ```
 returns  ```USER_KICKED``` response type
 #### Delete group
-```json
+```
 {
     type: "DELETE_GROUP",
     groupId: Number
@@ -112,7 +112,7 @@ returns  ```USER_KICKED``` response type
 ```
 returns  ```GROUP_DELETED``` response type
 #### Change group name
-```json
+```
 {
     type:"CHANGE_GROUP_NAME",
     groupId: Number,
@@ -121,7 +121,7 @@ returns  ```GROUP_DELETED``` response type
 ```
 returns  ```GROUP_NAME_CHANGED``` response type
 #### Remove message
-```json
+```
 {
     type:"REMOVE_MESSAGE",
     messageId: Number,
@@ -130,7 +130,7 @@ returns  ```GROUP_NAME_CHANGED``` response type
 ```
 returns  ```MESSAGE_DELETED``` response type
 #### Edit message
-```json
+```
 {
     type:"EDIT_MESSAGE",
     messageId: Number,
@@ -140,7 +140,7 @@ returns  ```MESSAGE_DELETED``` response type
 ```
 returns  ```MESSAGE_EDITED``` response type
 #### Invite user to group
-```json
+```
 {
     type:"INVITE_USER",
     groupId: Int,
@@ -151,7 +151,7 @@ returns  ```USER_JOINED``` response type
 
 ## Responses (messages that server can send to client)
 #### New message recieved
-```json
+```
 {
     status: "OK",
     type: "NEW_MESSAGE",
@@ -168,7 +168,7 @@ returns  ```USER_JOINED``` response type
 ```
 #### Unread messages (probably be deleted or replaced)
 not implemented
-```json
+```
 {
     status: "OK",
     type: "ALL_UNREAD_MESSAGES",
@@ -190,7 +190,7 @@ not implemented
 }
 ```
 #### User blocked
-```json
+```
 {
     status: "OK",
     type: "USER_BLOCKED",
@@ -201,7 +201,7 @@ not implemented
 }
 ```
 #### User kicked
-```json
+```
 {
     status: "OK",
     type: "USER_KICKED",
@@ -214,7 +214,7 @@ not implemented
 }
 ```
 #### User joined
-```json
+```
 {
     status: "OK",
     type: "USER_JOINED",
@@ -227,7 +227,7 @@ not implemented
 }
 ```
 #### You left a group
-```json
+```
 {
     status: "OK",
     type: "LEFT_GROUP",
@@ -238,7 +238,7 @@ not implemented
 }
 ```
 #### You created group
-```json
+```
 {
     status: "OK",
     type: "CREATED_GROUP",
@@ -249,7 +249,7 @@ not implemented
 }
 ```
 #### Message sent
-```json
+```
 {
     status: "OK",
     type: "USER_BLOCKED",
@@ -260,7 +260,7 @@ not implemented
 }
 ```
 #### User unblocked
-```json
+```
 {
     status: "OK",
     type: "USER_UBLOCKED",
@@ -271,7 +271,7 @@ not implemented
 }
 ```
 #### Group Info
-```json
+```
 {
     status: "OK",
     type: "GROUP_INFO",
@@ -284,7 +284,7 @@ not implemented
 }
 ```
 #### Loaded messages
-```json
+```
 {
     status: "OK",
     type: "LOADED_MESSAGES",
@@ -303,7 +303,7 @@ not implemented
 }
 ```
 #### Bad request
-```json
+```
 {
     status: "ERR",
     type: "BAD_REQUEST",
@@ -314,7 +314,7 @@ not implemented
 }
 ```
 #### Group name was changed
-```json
+```
 {
     status: "OK",
     type: "GROUP_NAME_CHANGED",
@@ -326,7 +326,7 @@ not implemented
 }
 ```
 #### Message was deleted
-```json
+```
 {
     status: "OK",
     type: "MESSAGE_DELETED",
@@ -342,7 +342,7 @@ not implemented
 }
 ```
 #### Message was edited
-```json
+```
 {
     status: "OK",
     type: "MESSAGE_EDITED",
@@ -358,7 +358,7 @@ not implemented
 }
 ```
 #### User from your group became online | offline
-```json
+```
 {
     status: "OK",
     type: "USER_ONLINE_CHANGED",
@@ -370,7 +370,7 @@ not implemented
 }
 ```
 #### Group deleted
-```json
+```
 {
     status: "OK",
     type: "GROUP_DELETED",
