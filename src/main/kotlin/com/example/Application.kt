@@ -87,7 +87,7 @@ fun Application.module() {
                 is NumberFormatException -> call.respondText(
                     text = "${HttpStatusCode.BadRequest.value}: Not a number: ${cause.message}",
                     status = HttpStatusCode.BadRequest)
-                /*
+
                 is NotFoundException -> call.respondText(
                     text = "${HttpStatusCode.NotFound.value} ${cause.message}",
                     status = HttpStatusCode.NotFound)
@@ -98,7 +98,7 @@ fun Application.module() {
                 is UnauthorizedException -> call.respondText(
                     text = cause.message,
                     status = cause.code
-                )*/
+                )
                 is Exception -> call.respondText(
                     text = cause.message,
                     status = cause.code

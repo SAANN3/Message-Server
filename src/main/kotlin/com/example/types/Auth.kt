@@ -31,7 +31,7 @@ class Auth {
             return BCrypt.withDefaults().hashToString(12,password.toCharArray())
         }
         fun verifyPassword(oldPassword:String,plainPassword:String):Boolean{
-            return  BCrypt.verifyer().verify(plainPassword.toCharArray(),oldPassword.toCharArray()).verified;
+            return  BCrypt.verifyer().verify(plainPassword.toCharArray(),oldPassword).verified;
         }
         fun generateToken(user:User):Token{
             val token = JWT.create()

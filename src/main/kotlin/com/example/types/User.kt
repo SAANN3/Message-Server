@@ -91,7 +91,7 @@ class User private constructor(
         )
     }
     fun changePassword(passwordChange: PasswordChange){
-        if (Auth.verifyPassword(password,passwordChange.oldPassword)){
+        if (Auth.verifyPassword(password,passwordChange.oldPassword,)){
             passwordChange.newPassword = Auth.bcryptPassword(passwordChange.newPassword)
             password = passwordChange.newPassword
         } else {

@@ -8,7 +8,7 @@ annotation class WsRequest(val type:String)
 @Serializable
 data class WebsocketRequest<T:WsRequest>(
     val type: String,
-    val data:T?
+    val data:T
 )
 class WebsocketRequests(){
     companion object {
