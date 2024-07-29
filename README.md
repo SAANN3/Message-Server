@@ -20,7 +20,7 @@ If you want, you can import it into local installation of postgres(database name
 
 
 # Run server
-If you want to start postgres container with installed scheme and then launch server, connected to docker db
+If you want to start postgres container with already installed scheme and then launch server, connected to docker db
 ```
 ./dockerRun.sh
 ```
