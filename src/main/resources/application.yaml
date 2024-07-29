@@ -11,4 +11,4 @@ jwt:
   realm: "ktor sample app"
   secret: "HUI"
 postgres:
-  url: "jdbc:postgresql://localhost:5432/server-message"
+  url: "$DB_URL:jdbc:postgresql://localhost:5432/server-message"
