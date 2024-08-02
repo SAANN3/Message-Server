@@ -61,7 +61,7 @@ returns  ```CREATED_GROUP``` response type
 }
 ```
 returns  ```LEFT_GROUP``` response type
-#### Load messages
+#### Load the newest messages
 By default, 30 most new messages are loaded. If, for example offset equals to 1,we return 30 messages after the newest one
 ```
 {
@@ -71,13 +71,23 @@ By default, 30 most new messages are loaded. If, for example offset equals to 1,
 }
 ```
 returns  ```LOADED_MESSAGES``` response type
-#### Get unread messages
-Not implemented
+#### Load messages after another message
+Loads 30 messages that was written after given id
 ```
 {
-    type: "GET_UNREAD_MESSAGES"
+    type: "LOAD_MESSAGES_AFTER"
+    groupId: Number,
+    messageId: Number
 }
 ```
+returns  ```LOADED_MESSAGES``` response type
+#### Get last read message from every group
+```
+{
+    type: "GET_LAST_READ_MESSAGES"
+}
+```
+returns ```ALL_UNREAD_MESSAGES``` response type
 #### Get group info
 ```
 {
@@ -148,9 +158,17 @@ returns  ```MESSAGE_EDITED``` response type
 }
 ```
 returns  ```USER_JOINED``` response type
-
+#### Read all messages before this
+```
+{
+    type: "READ_MESSAGES",
+    messages: messageId,
+    groupId: Number
+}
+```
+returns ```MESSAGES_READ``` response type to all users in group
 ## Responses (messages that server can send to client)
-#### New message recieved
+#### New message received
 ```
 {
     status: "OK",
@@ -162,30 +180,19 @@ returns  ```USER_JOINED``` response type
         groupId: Number,
         text: String,
         date: Date,
-        edited: Bool
+        edited: Bool,
+        readBy: Array<Number> // id of users who read
     }
 }
 ```
-#### Unread messages (probably be deleted or replaced)
-not implemented
+#### Get id of last read message from every group
 ```
 {
     status: "OK",
     type: "ALL_UNREAD_MESSAGES",
     errorMessage: null,
     data: {
-        Map<Int, {
-            groupId: Number,
-            unreadAmount: Number,
-            lastMessage: {
-                id: Number, // id of the message
-                sender: Number, // id of user who sent message
-                groupId: Number,
-                text: String,
-                date: Date,
-                edited: Bool
-            }
-        }>
+        Map<Int, Int | null>
     }
 }
 ```
@@ -296,7 +303,8 @@ not implemented
             groupId: Number,
             text: String,
             date: Date,
-            edited: Bool
+            edited: Bool,
+            readBy: Array<Number> // id of users who read
         }>,
         groupId: Number
     }
@@ -337,7 +345,8 @@ not implemented
             groupId: Number,
             text: String,
             date: Date,
-            edited: Bool
+            edited: Bool,
+            readBy: Array<Number> // id of users who read
     }
 }
 ```
@@ -353,7 +362,8 @@ not implemented
             groupId: Number,
             text: String,
             date: Date,
-            edited: Bool
+            edited: Bool,
+            readBy: Array<Number> // id of users who read
     }
 }
 ```
@@ -377,6 +387,19 @@ not implemented
     errorMessage: null,
     data: {
         groupId: Number
+    }
+}
+```
+#### User read all messages before this
+```
+{
+    status: "OK",
+    type: "MESSAGES_READ",
+    errorMessage: null,
+    data: {
+        groupId: Number,
+        userId: Number,
+        lastMessageId: Number,
     }
 }
 ```

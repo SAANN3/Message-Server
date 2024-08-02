@@ -40,9 +40,11 @@ data class PasswordChange(
 data class UserSettingsPost(
     val password: PasswordChange?,
     val name: String?,
+    val receiveInvites: Boolean?
     //val image: Int,
 )
 @Serializable
 data class UserSettingsGet(
-    val name: String
+    val name: String,
+    val receiveInvites: Boolean
 )

@@ -29,6 +29,19 @@ class Group private  constructor(
         )
         return messages
     }
+    fun getMessagesAfter(messageId: Int,amount:Int):MutableList<Message> {
+        val messages = PostgresDb.getMessages(
+            """
+                SELECT * FROM MESSAGES
+                WHERE 
+                    messages.groupid = ${id}
+                    AND
+                    messages.id > ${messageId}
+                LIMIT $amount
+            """.trimIndent()
+        )
+        return messages
+    }
     fun howMuchOnline(): Int {
         var n = 0
         members.forEach {
@@ -38,7 +51,47 @@ class Group private  constructor(
         }
         return n
     }
+    fun getLastReadMessage(user:User): Message? {
+        return PostgresDb.getMessage("""
+            SELECT * FROM MESSAGES
+            LEFT JOIN unreadmessages
+            ON 
+                unreadmessages.userid = ${user.id}
+                AND
+                unreadmessages.messageid = messages.id
+            WHERE 
+                messages.groupid = ${id}
+                AND
+                unreadmessages.userid IS NOT NULL
+            LIMIT 1
+        """.trimIndent())
+    }
+    suspend fun readMessages(user:User, messageId: Int) {
+        val messages = PostgresDb.getMessages(
+            """
+                SELECT * FROM MESSAGES
+                LEFT JOIN unreadmessages
+                ON 
+                    unreadmessages.userid = ${user.id}
+                    AND
+                    unreadmessages.messageid = messages.id
+                WHERE 
+                    messages.groupid = ${id}
+                    AND
+                    messages.id <= ${messageId}
+                    AND
+                    unreadmessages.userid IS NULL
+            """.trimIndent()
+        )
+        messages.forEach {
+            it.hasBeenRead(user)
+        }
+        forEachMember {
+            it.messagesRead(messageId,this,user.id)
+        }
+    }
     suspend fun sendMessage(sender:User, text:String): Message{
+
         val message = Message(this,sender,text)
         forEachMember {
             it.newMessage(message)
@@ -66,6 +119,12 @@ class Group private  constructor(
         }
     }
     suspend fun inviteUser(sender:User,invited:User){
+        if(invited.isBlocked(sender)) {
+            throw NotFoundException("You`re blocked by user")
+        }
+        if(!invited.getSettings().receiveInvites) {
+            throw NotFoundException("User cant accept invites")
+        }
         if(isInGroup(invited.id)){
             throw BadRequestException("User already in group")
         }

@@ -40,8 +40,14 @@ class WebsocketRequests(){
         val offset: Int,
     )
     @Serializable
-    @WsRequest("GET_UNREAD_MESSAGES")
-    class GetUnreadMessages()
+    @WsRequest("LOAD_MESSAGES_AFTER")
+    data class LoadMessagesAfter(
+        val groupId: Int,
+        val messageId: Int,
+    )
+    @Serializable
+    @WsRequest("GET_LAST_READ_MESSAGES")
+    class GetLastReadMessages()
 
     @Serializable
     @WsRequest("GET_GROUP_INFO")
@@ -93,6 +99,12 @@ class WebsocketRequests(){
     data class InviteUser(
         val groupId: Int,
         val userId: Int
+    )
+    @Serializable
+    @WsRequest("READ_MESSAGES")
+    data class ReadMessage(
+        val messageId: Int,
+        val groupId: Int,
     )
 }
 @Serializable

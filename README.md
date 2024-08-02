@@ -5,7 +5,7 @@ A server for sending and recieving messages via websocket written in kotlin with
 # Docs
 If you want to use Swagger, there are  api docs on ```[serverUrl]/swagger/index.html``` (for example http://0.0.0.0:8080/swagger/index.html). Documented all routes except websocket one. Also swagger is weird at showing kotlinx instance data type.
 
-There are also same [docs](https://github.com/SAANN3/Message-Server/blob/main/docs/api.md) on github, but also with documented websocket and fixed data types.
+There are also same [docs](https://github.com/SAANN3/Message-Server/blob/main/docs/api.md) on GitHub, but also with documented websocket and fixed data types.
 
 
 # Building on linux
@@ -36,4 +36,4 @@ Or if you want to run only server, that by default, connects to local database
 
 3:~~document websocket in GitHub~~ and maybe swagger(probably no)
 
-4: Implement unread messages system
+4: ~~Implement unread messages system~~

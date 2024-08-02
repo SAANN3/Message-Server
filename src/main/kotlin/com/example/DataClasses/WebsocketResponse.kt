@@ -31,17 +31,16 @@ class WebSocketResponses(){
         val text: String,
         val date: Instant,
         val edited: Boolean,
+        val readBy: MutableList<Int>
     )
     @Serializable
     data class UnreadMessages(
-        val groupId: Int,
         val unreadAmount: Int,
-        val lastMessage: Message
     )
     @Serializable
     @WsResponse("ALL_UNREAD_MESSAGES")
     data class ResAllUnreadMessages(
-        val messages: HashMap<Int,MutableList<UnreadMessages>>
+        val messages: HashMap<Int,Int?>
     )
     @Serializable
     @WsResponse("USER_BLOCKED")
@@ -124,5 +123,12 @@ class WebSocketResponses(){
     @WsResponse("GROUP_DELETED")
     data class GroupDeleted(
         val groupId: Int
+    )
+    @Serializable
+    @WsResponse("MESSAGES_READ")
+    data class MessagesRead(
+        val lastMessageId: Int,
+        val groupId:Int,
+        val userId: Int
     )
 }

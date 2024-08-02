@@ -105,6 +105,33 @@ ALTER TABLE public.messages ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
+-- Name: unreadmessages; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.unreadmessages (
+    id integer NOT NULL,
+    userid integer NOT NULL,
+    messageid integer NOT NULL
+);
+
+
+ALTER TABLE public.unreadmessages OWNER TO postgres;
+
+--
+-- Name: unreadmessages_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+ALTER TABLE public.unreadmessages ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.unreadmessages_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
 -- Name: users; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -115,7 +142,8 @@ CREATE TABLE public.users (
     login text NOT NULL,
     createdat timestamp without time zone NOT NULL,
     loginedat timestamp without time zone NOT NULL,
-    email text NOT NULL
+    email text NOT NULL,
+    settings text
 );
 
 
@@ -195,6 +223,22 @@ ALTER TABLE ONLY public.members
 
 
 --
+-- Name: unreadmessages unreadmessages_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.unreadmessages
+    ADD CONSTRAINT unreadmessages_pk PRIMARY KEY (id);
+
+
+--
+-- Name: unreadmessages unreadmessages_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.unreadmessages
+    ADD CONSTRAINT unreadmessages_unique UNIQUE (userid, messageid);
+
+
+--
 -- Name: users users_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -264,6 +308,22 @@ ALTER TABLE ONLY public.messages
 
 ALTER TABLE ONLY public.messages
     ADD CONSTRAINT messages_users_fk FOREIGN KEY (sender) REFERENCES public.users(id);
+
+
+--
+-- Name: unreadmessages unreadmessages_messages_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.unreadmessages
+    ADD CONSTRAINT unreadmessages_messages_fk FOREIGN KEY (messageid) REFERENCES public.messages(id) ON DELETE CASCADE;
+
+
+--
+-- Name: unreadmessages unreadmessages_users_fk_1; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.unreadmessages
+    ADD CONSTRAINT unreadmessages_users_fk_1 FOREIGN KEY (userid) REFERENCES public.users(id) ON DELETE CASCADE;
 
 
 --

@@ -3,11 +3,13 @@ package com.example.types
 import at.favre.lib.crypto.bcrypt.BCrypt
 import com.example.DataClasses.*
 import com.example.PostgresDb
+import com.example.types.GlobalInfo.Json
 import io.ktor.server.auth.*
 import io.ktor.server.plugins.*
 import io.ktor.server.util.*
 import kotlinx.datetime.*
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
 import java.sql.ResultSet
 import java.time.ZoneOffset
 
@@ -21,9 +23,31 @@ class User private constructor(
     var lastLogin: Instant,
     val email: String,
     val groups: MutableList<Int>,
+    private var settings: UserSettings
     //val imageId:Int?,
 ) : Principal {
+    @Serializable
+    class UserSettings(){
+        var receiveInvites:Boolean = true
+    }
     var isOnline = GlobalInfo.users[this.id] != null
+    private val blockedUsers:MutableList<Int> = mutableListOf()
+    private fun updateSettings(){
+        PostgresDb.transactionNoReturn(
+            """
+                UPDATE users
+                SET settings = '${Json.encodeToString<UserSettings>(settings)}'
+                WHERE users.id = '$id'
+            """.trimIndent()
+        )
+    }
+    fun setSettings(settings: UserSettings){
+        this.settings = settings
+        updateSettings()
+    }
+    fun getSettings():UserSettings{
+        return this.settings
+    }
     fun serializeShort(): UserInfoShort {
         return UserInfoShort(
             this.id,
@@ -42,10 +66,18 @@ class User private constructor(
             this.groups
         )
     }
-    fun getSettings(): UserSettingsGet {
-        return UserSettingsGet(
-            this.name,
-        )
+    private fun loadBlocked(){
+        val blocked = PostgresDb.getIntList(
+            """
+                SELECT usersblocked.blockedid 
+                FROM usersblocked
+                WHERE 
+	                usersblocked.userid = '${id}'
+            """.trimIndent())
+        blockedUsers += blocked
+    }
+    fun isBlocked(user:User):Boolean{
+        return blockedUsers.contains(user.id)
     }
     fun changeName(newName:String){
         PostgresDb.transactionNoReturn(
@@ -106,14 +138,26 @@ class User private constructor(
         )
     }
 
+    fun getSettingsSerializable(): UserSettingsGet {
+        return UserSettingsGet(
+            name,
+            settings.receiveInvites
+        )
+    }
     companion object {
         operator fun invoke(rs:ResultSet): User {
             var groups:MutableList<Int?>? = (rs.getArray("groups").array as Array<Int>).toMutableList()
             if (groups != null && groups[0] == null){
                 groups = mutableListOf()
             }
+            val rawSettings = rs.getString("settings")
+            val settings:UserSettings = if(rs.wasNull()){
+                UserSettings()
+            } else{
+                Json.decodeFromString<UserSettings>(rawSettings)
+            }
             //val imageId = if(rs.getObject("image") != null) rs.getInt("image") else  null
-             return User(
+             val user = User(
                 rs.getInt("id"),
                 rs.getString("name"),
                 rs.getString("password"),
@@ -122,7 +166,10 @@ class User private constructor(
                 rs.getTimestamp("loginedat").toInstant().toKotlinInstant(),
                 rs.getString("email"),
                 groups as MutableList<Int>,
+                settings
             )
+            user.loadBlocked()
+            return user
         }
         operator fun invoke(id:Int): User {
             val user = PostgresDb.getUser(
@@ -207,7 +254,7 @@ class User private constructor(
                     FROM newUser
                     LEFT JOIN members
                     ON members.userid = newUser.id
-                    GROUP BY newUser.id,newUser.name,newUser.PASSWORD,newUser.login,newUser.createdat,newUser.loginedat,newUser.email
+                    GROUP BY newUser.id,newUser.name,newUser.PASSWORD,newUser.login,newUser.createdat,newUser.loginedat,newUser.email,newUser.settings
                 """.trimIndent()
             )
             return user!!

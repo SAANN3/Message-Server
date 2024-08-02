@@ -89,4 +89,10 @@ object PostgresDb {
     fun getMessages(query: String): MutableList<Message> {
         return getListOfSomething<Message>(query,Message::invoke);
     }
+    fun getIntList(query: String): MutableList<Int> {
+        return getListOfSomething<Int>(query){ rs ->
+            rs.getInt(0)
+        }
+    }
+
 }

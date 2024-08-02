@@ -17,7 +17,26 @@ class Message private constructor(
     var edited: Boolean,
     var text: String,
 ) {
-
+    val readBy: MutableList<Int> = mutableListOf()
+    private fun getWhoRead(){
+        readBy += PostgresDb.getIntList(
+            """
+                SELECT unreadmessages.userid
+                FROM unreadmessages
+                WHERE unreadmessages.messageid = ${id}
+            """.trimIndent()
+        )
+    }
+    fun hasBeenRead(user:User){
+        readBy += user.id
+        PostgresDb.transactionNoReturn(
+            """
+                INSERT INTO unreadmessages (userid,messageid)
+                VALUES ('${user.id}','${id}')
+                ON CONFLICT DO NOTHING
+            """.trimIndent()
+        )
+    }
     fun edit(text:String) {
        edited = true
        this.text = text
@@ -44,12 +63,13 @@ class Message private constructor(
             groupId,
             text,
             createdAt,
-            edited
+            edited,
+            readBy
         )
     }
     companion object {
         operator fun invoke(rs:ResultSet):Message {
-            return Message(
+            val message =  Message(
                 rs.getInt("id"),
                 rs.getInt("groupid"),
                 rs.getInt("sender"),
@@ -57,6 +77,8 @@ class Message private constructor(
                 rs.getBoolean("edited"),
                 rs.getString("text"),
             )
+            message.getWhoRead()
+            return message
         }
         operator fun invoke(group:Group,sender:User,text: String):Message {
             if(text.isEmpty()){
@@ -92,8 +114,16 @@ class Message private constructor(
                     it.groupId,
                     it.text,
                     it.createdAt,
-                    it.edited
+                    it.edited,
+                    it.readBy
                 )
+            }
+            return res
+        }
+        fun castToMessagesId(message:MutableList<Message>):MutableList<Int> {
+            val res: MutableList<Int> = mutableListOf()
+            message.forEach {
+                res += it.id
             }
             return res
         }

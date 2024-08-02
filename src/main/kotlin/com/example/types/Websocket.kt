@@ -24,6 +24,7 @@ object GlobalInfo {
     val groups: HashMap<Int, Group> = HashMap<Int,Group>()
     val Json = Json{
         ignoreUnknownKeys = true
+        encodeDefaults = true
     }
 }
 
@@ -88,9 +89,13 @@ class UserWebsocket(
                     }
                     sendOk(WebSocketResponses.CreateGroup(group.id))
                 }
-                WebsocketRequests.getAnnotation(WebsocketRequests.GetUnreadMessages::class) -> {
-                    val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.GetUnreadMessages>(text)
-                    //TODO
+                WebsocketRequests.getAnnotation(WebsocketRequests.GetLastReadMessages::class) -> {
+                    val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.GetLastReadMessages>(text)
+                    val unreadMessages:HashMap<Int,Int?> = hashMapOf()
+                    user.groups.forEach {
+                        unreadMessages[it] = accessGroup(it).getLastReadMessage(user)?.id
+                    }
+                    sendOk(WebSocketResponses.ResAllUnreadMessages(unreadMessages))
                 }
                 WebsocketRequests.getAnnotation(WebsocketRequests.InviteUser::class) -> {
                     val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.InviteUser>(text)
@@ -114,6 +119,14 @@ class UserWebsocket(
                         type.groupId
                     ))
                 }
+                WebsocketRequests.getAnnotation(WebsocketRequests.LoadMessagesAfter::class) -> {
+                    val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.LoadMessagesAfter>(text)
+                    val messages = accessGroup(type.groupId).getMessagesAfter(type.messageId,30)
+                    sendOk(WebSocketResponses.LoadMessages(
+                        Message.castToResponseMessages(messages),
+                        type.groupId
+                    ))
+                }
                 WebsocketRequests.getAnnotation(WebsocketRequests.DeleteGroup::class) -> {
                     val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.DeleteGroup>(text)
                     val group = accessGroup(type.groupId)
@@ -131,6 +144,10 @@ class UserWebsocket(
                 WebsocketRequests.getAnnotation(WebsocketRequests.EditMessage::class) -> {
                     val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.EditMessage>(text)
                     accessGroup(type.groupId).editMessage(user,type.messageId,type.text)
+                }
+                WebsocketRequests.getAnnotation(WebsocketRequests.ReadMessage::class) -> {
+                    val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.ReadMessage>(text)
+                    accessGroup(type.groupId).readMessages(user,type.messageId)
                 }
                 else -> {
                     sendErr(WebSocketResponses.BadRequest(),"Type [$typeName] not recognized")
@@ -166,6 +183,9 @@ class UserWebsocket(
     suspend fun groupDeleted(group: Group){
         user.groups -= group.id
         sendOk(WebSocketResponses.GroupDeleted(group.id))
+    }
+    suspend fun messagesRead(messageId: Int,group: Group,userid:Int) {
+        sendOk(WebSocketResponses.MessagesRead(messageId,group.id,userid))
     }
     private suspend inline fun <reified T: Any> sendOk(data:T){
         _send(data,WebSocketResponses.getAnnotation(data::class),"OK",null)

@@ -14,10 +14,10 @@ If you want to see websocket docs go [here](https://github.com/SAANN3/Message-Se
 | `Authorization` | bearer token |
 
 ##### Responses
-| Status | Response  |
-| ------ | --------- |
-| 200    |<br><pre lang="json">{&#13;  "id": 1,&#13;  "name": "string",&#13;  "createdAt": "2024-07-28T18:27:06.785Z", &#13;  "lastLogin": "2024-07-28T18:27:06.785Z", &#13;  "email": "string", &#13;  "groups": [1,2,3,4,5]  &#13;}</pre>|
-| 400    |Unathorized|
+| Status | Response                                                                                                                                                                                                                          |
+|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 200    | <br><pre lang="json">{&#13;  "id": 1,&#13;  "name": "string",&#13;  "createdAt": "2024-07-28T18:27:06.785Z", &#13;  "lastLogin": "2024-07-28T18:27:06.785Z", &#13;  "email": "string", &#13;  "groups": [1,2,3,4,5]  &#13;}</pre> |
+| 400    | Unathorized                                                                                                                                                                                                                       |
 
 #### Get User settings
 
@@ -30,10 +30,10 @@ If you want to see websocket docs go [here](https://github.com/SAANN3/Message-Se
 | `Authorization` | bearer token |
 
 ##### Responses
-| Status | Response  |
-| ------ | --------- |
-| 200    |<br><pre lang="json">{&#13; "name":"string" &#13;}</pre>|
-| 400    |Unathorized|
+| Status | Response                                                                                  |
+|--------|-------------------------------------------------------------------------------------------|
+| 200    | <br><pre lang="json">{&#13; "name":"string",&#13; "receiveInvites": "boolean",&#13;}</pre> |
+| 400    | Unathorized                                                                               |
 
 #### Set User settings
 only passed properties will be changed
@@ -51,7 +51,8 @@ Request body
   "password": {
     "newPassword": "string",
     "oldPassword": "string"
-  }
+  },
+  "receiveInvites": "boolean"
 }
 ```
 ##### Responses

@@ -62,7 +62,7 @@ fun Route.globalRoutes(){
                 }
             }) {
                 val user = call.principal<User>()!!
-                val settings = user.getSettings()
+                val settings = user.getSettingsSerializable()
                 call.respond(settings)
             }
 
@@ -88,8 +88,11 @@ fun Route.globalRoutes(){
             }) {
                 val user = call.principal<User>()!!
                 val settings = call.receive<UserSettingsPost>()
+                val userSettings = user.getSettings()
                 settings.password?.let { user.changePassword(it) }
                 settings.name?.let { user.changeName(it) }
+                settings.receiveInvites?.let { userSettings.receiveInvites = it }
+                user.setSettings(userSettings)
                 call.respondText("ok")
             }
         }
