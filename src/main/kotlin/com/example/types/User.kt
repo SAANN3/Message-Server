@@ -21,7 +21,6 @@ class User private constructor(
     val login:String,
     val createdAt: Instant,
     var lastLogin: Instant,
-    val email: String,
     val groups: MutableList<Int>,
     private var settings: UserSettings
     //val imageId:Int?,
@@ -62,7 +61,6 @@ class User private constructor(
             this.name,
             this.createdAt,
             this.lastLogin,
-            this.email,
             this.groups
         )
     }
@@ -164,7 +162,6 @@ class User private constructor(
                 rs.getString("login"),
                 rs.getTimestamp("createdAt").toInstant().toKotlinInstant(),
                 rs.getTimestamp("loginedat").toInstant().toKotlinInstant(),
-                rs.getString("email"),
                 groups as MutableList<Int>,
                 settings
             )
@@ -210,32 +207,8 @@ class User private constructor(
                 throw NotFoundException("User not found");
             }
         }
-        operator fun invoke(login:String,email: String): User{
-            val user = PostgresDb.getUser(
-                """
-                    SELECT 
-	                    users.*,
-	                    ARRAY_AGG(DISTINCT members.groupid) AS GROUPS
-                    FROM users
-                    LEFT JOIN members
-                    ON members.userid = users.id
-                    WHERE 
-                        users.login = '$login'
-                        OR
-                        users.email = '$email'
-                    GROUP BY users.id
-                    LIMIT 1
-                """.trimIndent())
-            if(user != null) {
-                user.updateLoginDate()
-                return user
-            }
-            else {
-                throw NotFoundException("User not found");
-            }
-        }
         operator fun invoke(userRegister: UserRegister): User {
-            val existingUser = try { User(userRegister.login,userRegister.email)} catch (e:NotFoundException){ null }
+            val existingUser = try { User(userRegister.login)} catch (e:NotFoundException){ null }
             if (existingUser != null){
                 throw BadRequestException("User already exists")
             }
@@ -244,8 +217,8 @@ class User private constructor(
             val user = PostgresDb.getUser(
                 """
                     WITH newUser AS (
-                    INSERT INTO users (name,password,login,createdat,loginedat,email) 
-                    VALUES ('${userRegister.name}', '${userRegister.password}', '${userRegister.login}','${currentTime}','${currentTime}','${userRegister.email}')
+                    INSERT INTO users (name,password,login,createdat,loginedat) 
+                    VALUES ('${userRegister.name}', '${userRegister.password}', '${userRegister.login}','${currentTime}','${currentTime}')
                     RETURNING *
                     )
                     SELECT 
@@ -254,7 +227,7 @@ class User private constructor(
                     FROM newUser
                     LEFT JOIN members
                     ON members.userid = newUser.id
-                    GROUP BY newUser.id,newUser.name,newUser.PASSWORD,newUser.login,newUser.createdat,newUser.loginedat,newUser.email,newUser.settings
+                    GROUP BY newUser.id,newUser.name,newUser.PASSWORD,newUser.login,newUser.createdat,newUser.loginedat,newUser.settings
                 """.trimIndent()
             )
             return user!!

@@ -16,7 +16,6 @@ data class UserInfoFull(
     var name:String,
     val createdAt: Instant,
     var lastLogin: Instant,
-    val email: String,
     val groups: MutableList<Int>,
 )
 @Serializable
@@ -24,7 +23,6 @@ data class UserRegister(
     val name: String,
     var password: String,
     val login: String,
-    val email: String,
 )
 @Serializable
 data class UserLogin(

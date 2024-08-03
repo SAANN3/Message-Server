@@ -142,7 +142,6 @@ CREATE TABLE public.users (
     login text NOT NULL,
     createdat timestamp without time zone NOT NULL,
     loginedat timestamp without time zone NOT NULL,
-    email text NOT NULL,
     settings text
 );
 
@@ -252,14 +251,6 @@ ALTER TABLE ONLY public.users
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_unique UNIQUE (login);
-
-
---
--- Name: users users_unique_1; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.users
-    ADD CONSTRAINT users_unique_1 UNIQUE (email);
 
 
 --
