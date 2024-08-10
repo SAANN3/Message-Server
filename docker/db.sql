@@ -21,6 +21,33 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: friendsinvites; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.friendsinvites (
+    id integer NOT NULL,
+    userid integer NOT NULL,
+    friendid integer NOT NULL
+);
+
+
+ALTER TABLE public.friendsinvites OWNER TO postgres;
+
+--
+-- Name: friendinvites_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+ALTER TABLE public.friendsinvites ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.friendinvites_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
 -- Name: groups; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -190,6 +217,33 @@ ALTER TABLE public.usersblocked ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY
 
 
 --
+-- Name: usersfriends; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.usersfriends (
+    id integer NOT NULL,
+    userid integer NOT NULL,
+    friendid integer NOT NULL
+);
+
+
+ALTER TABLE public.usersfriends OWNER TO postgres;
+
+--
+-- Name: usersfriends_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+ALTER TABLE public.usersfriends ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.usersfriends_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
 -- Name: groups group_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -270,6 +324,54 @@ ALTER TABLE ONLY public.usersblocked
 
 
 --
+-- Name: usersfriends usersfriends_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.usersfriends
+    ADD CONSTRAINT usersfriends_pk PRIMARY KEY (id);
+
+
+--
+-- Name: friendsinvites usersfriends_pk_1; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.friendsinvites
+    ADD CONSTRAINT usersfriends_pk_1 PRIMARY KEY (id);
+
+
+--
+-- Name: usersfriends usersfriends_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.usersfriends
+    ADD CONSTRAINT usersfriends_unique UNIQUE (userid, friendid);
+
+
+--
+-- Name: friendsinvites usersfriends_unique_1; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.friendsinvites
+    ADD CONSTRAINT usersfriends_unique_1 UNIQUE (userid, friendid);
+
+
+--
+-- Name: friendsinvites friendinvites_users_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.friendsinvites
+    ADD CONSTRAINT friendinvites_users_fk FOREIGN KEY (userid) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: friendsinvites friendsinvites_users_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.friendsinvites
+    ADD CONSTRAINT friendsinvites_users_fk FOREIGN KEY (friendid) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
 -- Name: members members_group_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -331,6 +433,22 @@ ALTER TABLE ONLY public.usersblocked
 
 ALTER TABLE ONLY public.usersblocked
     ADD CONSTRAINT usersblocked_users_fk_1 FOREIGN KEY (blockedid) REFERENCES public.users(id);
+
+
+--
+-- Name: usersfriends usersfriends_users1_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.usersfriends
+    ADD CONSTRAINT usersfriends_users1_fk FOREIGN KEY (friendid) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: usersfriends usersfriends_users_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.usersfriends
+    ADD CONSTRAINT usersfriends_users_fk FOREIGN KEY (userid) REFERENCES public.users(id) ON DELETE CASCADE;
 
 
 --

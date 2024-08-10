@@ -1,8 +1,8 @@
 
 ## API Reference
-Basically i duplicated swagger docs here with fixed instance type, but who cares.
+Basically I duplicated swagger docs here with fixed instance type, but who cares.
 
-If you want to see websocket docs go [here](https://github.com/SAANN3/Message-Server/blob/main/docs/websocket.md) 
+If you want to see websocket docs go [here](https://github.com/SAANN3/Message-Server/blob/main/docs/websocket.md)
 #### Get User info
 
 ```http
@@ -16,8 +16,8 @@ If you want to see websocket docs go [here](https://github.com/SAANN3/Message-Se
 ##### Responses
 | Status | Response                                                                                                                                                                                                |
 |--------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 200    | <br><pre lang="json">{&#13;  "id": 1,&#13;  "name": "string",&#13;  "createdAt": "2024-07-28T18:27:06.785Z", &#13;  "lastLogin": "2024-07-28T18:27:06.785Z", &#13;  "groups": [1,2,3,4,5]  &#13;}</pre> |
-| 400    | Unathorized                                                                                                                                                                                             |
+| 200    | <br><pre lang="json">{&#13;  "id": 1,&#13;  "name": "string",&#13;  "createdAt": "2024-07-28T18:27:06.785Z", &#13;  "lastLogin": "2024-07-28T18:27:06.785Z", &#13;  "groups": [1,2,3,4,5],  &#13;  "friends": [1,2,3,4,5],&#13;  "friendsInvites": [6,7,8],&#13;  "myInvites": [11,62,23,14,55],  &#13;}</pre> |
+| 400    | Unathorized                                                                                                                                                                                             |                                                                                                                                                                                        |
 
 #### Get User settings
 
@@ -32,7 +32,7 @@ If you want to see websocket docs go [here](https://github.com/SAANN3/Message-Se
 ##### Responses
 | Status | Response                                                                                  |
 |--------|-------------------------------------------------------------------------------------------|
-| 200    | <br><pre lang="json">{&#13; "name":"string",&#13; "receiveInvites": "boolean",&#13;}</pre> |
+| 200    | <br><pre lang="json">{&#13; "name":"string",&#13; "settings": {&#13;   "nonFriendsGroupsInvites": "boolean"&#13; },&#13;}</pre> |
 | 400    | Unathorized                                                                               |
 
 #### Set User settings
@@ -52,7 +52,7 @@ Request body
     "newPassword": "string",
     "oldPassword": "string"
   },
-  "receiveInvites": "boolean"
+  "nonFriendsGroupsInvites": "boolean"
 }
 ```
 ##### Responses

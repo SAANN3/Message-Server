@@ -91,7 +91,7 @@ fun Route.globalRoutes(){
                 val userSettings = user.getSettings()
                 settings.password?.let { user.changePassword(it) }
                 settings.name?.let { user.changeName(it) }
-                settings.receiveInvites?.let { userSettings.receiveInvites = it }
+                settings.nonFriendsGroupsInvites?.let { userSettings.nonFriendsGroupsInvites = it }
                 user.setSettings(userSettings)
                 call.respondText("ok")
             }
@@ -170,7 +170,6 @@ fun Route.globalRoutes(){
     }
 
     get("/test"){
-        //call.respondText((Group(1).members == null).toString())
         throw BadRequestException("s")
     }
 

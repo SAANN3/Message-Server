@@ -8,6 +8,8 @@ import io.ktor.server.auth.*
 import io.ktor.server.plugins.*
 import io.ktor.server.util.*
 import kotlinx.datetime.*
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import java.sql.ResultSet
@@ -26,11 +28,15 @@ class User private constructor(
     //val imageId:Int?,
 ) : Principal {
     @Serializable
+    @OptIn(ExperimentalSerializationApi::class)
     class UserSettings(){
-        var receiveInvites:Boolean = true
+        @EncodeDefault var nonFriendsGroupsInvites:Boolean = true
     }
+    val friendsClass: UserFriends = UserFriends(this)
     var isOnline = GlobalInfo.users[this.id] != null
+
     private val blockedUsers:MutableList<Int> = mutableListOf()
+
     private fun updateSettings(){
         PostgresDb.transactionNoReturn(
             """
@@ -45,23 +51,27 @@ class User private constructor(
         updateSettings()
     }
     fun getSettings():UserSettings{
-        return this.settings
+        return settings
     }
     fun serializeShort(): UserInfoShort {
         return UserInfoShort(
-            this.id,
-            this.name,
+            id,
+            name,
             isOnline,
-            this.lastLogin,
+            lastLogin,
+            createdAt
         )
     }
     fun serializeFull(): UserInfoFull {
         return UserInfoFull(
-            this.id,
-            this.name,
-            this.createdAt,
-            this.lastLogin,
-            this.groups
+            id,
+            name,
+            createdAt,
+            lastLogin,
+            groups,
+            friendsClass.friends,
+            friendsClass.friendsInvites,
+            friendsClass.myInvitations,
         )
     }
     private fun loadBlocked(){
@@ -74,8 +84,10 @@ class User private constructor(
             """.trimIndent())
         blockedUsers += blocked
     }
-    fun isBlocked(user:User):Boolean{
-        return blockedUsers.contains(user.id)
+    fun isBlocked(user:User):Unit{
+        if(blockedUsers.contains(user.id)){
+            throw NotFoundException("You`re blocked by user")
+        }
     }
     fun changeName(newName:String){
         PostgresDb.transactionNoReturn(
@@ -119,6 +131,7 @@ class User private constructor(
                 ON CONFLICT DO NOTHING
             """.trimIndent()
         )
+        friendsClass.onBlock(user)
     }
     fun changePassword(passwordChange: PasswordChange){
         if (Auth.verifyPassword(password,passwordChange.oldPassword,)){
@@ -139,7 +152,7 @@ class User private constructor(
     fun getSettingsSerializable(): UserSettingsGet {
         return UserSettingsGet(
             name,
-            settings.receiveInvites
+            settings
         )
     }
     companion object {
@@ -169,6 +182,10 @@ class User private constructor(
             return user
         }
         operator fun invoke(id:Int): User {
+            val loadedUser = GlobalInfo.users[id]
+            if(loadedUser != null) {
+                return loadedUser.user
+            }
             val user = PostgresDb.getUser(
                 """
                     SELECT 

@@ -167,6 +167,55 @@ returns  ```USER_JOINED``` response type
 }
 ```
 returns ```MESSAGES_READ``` response type to all users in group
+#### Get users info
+```
+{
+    type: "GET_USERS_INFO",
+    usersId: Array<Number>
+}
+```
+returns ```USERS_INFO``` type
+#### Decline friend invite
+```
+{
+    type: "DECLINE_FRIEND_INVITE",
+    userId: Number
+}
+```
+returns to you and userid  ```FRIEND_CHANGED``` with status ```DECLINED```
+#### Revoke yours friend invite
+```
+{
+    type: "REVOKE_FRIEND_INVITE",
+    userId: Number
+}
+```
+returns to you and userid  ```FRIEND_CHANGED``` with status ```REVOKED```
+#### Accept friend request
+```
+{
+    type: "ACCEPT_FRIEND_REQUEST",
+    userId: Number
+}
+```
+returns to you and userid  ```FRIEND_CHANGED``` with status ```ACCEPTED```
+#### Remove friend
+```
+{
+    type: "REMOVE_FRIEND",
+    userId: Number
+}
+```
+returns to you and userid  ```FRIEND_CHANGED``` with status ```DELETED```
+#### Add friend
+```
+{
+    type: "ADD_FRIEND",
+    userId: Number
+}
+```
+returns to you and userid  ```FRIEND_CHANGED``` with status ```SENT```
+#### 
 ## Responses (messages that server can send to client)
 #### New message received
 ```
@@ -192,7 +241,8 @@ returns ```MESSAGES_READ``` response type to all users in group
     type: "ALL_UNREAD_MESSAGES",
     errorMessage: null,
     data: {
-        Map<Int, Int | null>
+        messages: Map<Int, Int | null>,
+        unreadAmount: Map<Int, Int>
     }
 }
 ```
@@ -403,3 +453,34 @@ returns ```MESSAGES_READ``` response type to all users in group
     }
 }
 ```
+#### Get info about users
+```
+{
+    status: "OK",
+    type: "USERS_INFO",
+    errorMessage: null,
+    data: {
+        users: Map<Int, {
+            id: Int,
+            name: String,
+            online: Boolean,
+            lastLogin: Date,
+            createdAt: Date,
+        }
+    }
+}
+```
+#### Something related to friends was changed
+```
+{
+    status: "OK",
+    type: "FRIEND_CHANGED",
+    errorMessage: null,
+    data: {
+        userId: Number, // yours or friend id
+        status: "REVOKED" | "ACCEPTED" | "DECLINED" | "DELETED" | "SENT" // enum
+        initiatorId: Number, // who called
+    }
+}
+```
+

@@ -17,6 +17,22 @@ class Group private  constructor(
     val members: MutableList<Int>,
     val creationDate: Instant,
 ){
+    fun getUnreadAmount(user:User): Int{
+        return PostgresDb.getInt(
+            """
+                SELECT COUNT(messages.id) FROM MESSAGES
+                LEFT JOIN unreadmessages
+                ON 
+                    unreadmessages.userid = ${user.id}
+                    AND
+                    unreadmessages.messageid = messages.id
+                WHERE 
+                    messages.groupid = ${id}
+                    AND
+                    unreadmessages.userid IS NULL
+            """.trimIndent()
+        )
+    }
     fun getLastMessages(amount:Int,offset:Int):MutableList<Message> {
         val messages = PostgresDb.getMessages(
             """
@@ -91,8 +107,8 @@ class Group private  constructor(
         }
     }
     suspend fun sendMessage(sender:User, text:String): Message{
-
         val message = Message(this,sender,text)
+        readMessages(sender, message.id)
         forEachMember {
             it.newMessage(message)
         }
@@ -119,10 +135,8 @@ class Group private  constructor(
         }
     }
     suspend fun inviteUser(sender:User,invited:User){
-        if(invited.isBlocked(sender)) {
-            throw NotFoundException("You`re blocked by user")
-        }
-        if(!invited.getSettings().receiveInvites) {
+        invited.isBlocked(sender)
+        if(!invited.getSettings().nonFriendsGroupsInvites && !invited.friendsClass.isFriendWith(sender)) {
             throw NotFoundException("User cant accept invites")
         }
         if(isInGroup(invited.id)){

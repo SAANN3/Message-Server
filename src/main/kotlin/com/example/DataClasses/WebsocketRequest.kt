@@ -106,6 +106,37 @@ class WebsocketRequests(){
         val messageId: Int,
         val groupId: Int,
     )
+    @Serializable
+    @WsRequest("ADD_FRIEND")
+    data class AddFriend(
+        val userId: Int
+    )
+    @Serializable
+    @WsRequest("REMOVE_FRIEND")
+    data class RemoveFriend(
+        val userId: Int
+    )
+    @Serializable
+    @WsResponse("ACCEPT_FRIEND_REQUEST")
+    data class AcceptFriendRequest(
+        val userId: Int,
+        val accept: Boolean
+    )
+    @Serializable
+    @WsResponse("REVOKE_FRIEND_INVITE")
+    data class RemoveMyFriendInvite(
+        val userId: Int
+    )
+    @Serializable
+    @WsResponse("DECLINE_FRIEND_INVITE")
+    data class DeclineFriendInvite(
+        val userId: Int
+    )
+    @Serializable
+    @WsRequest("GET_USERS_INFO")
+    data class GetUsersInfo(
+        val usersId: MutableList<Int>
+    )
 }
 @Serializable
 data class WebSocketRequestType(

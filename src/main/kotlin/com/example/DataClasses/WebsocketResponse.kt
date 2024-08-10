@@ -14,6 +14,13 @@ data class WebsocketResponse<T:Any>(
     val errorMessage: String?,
     val data:T
 )
+enum class FriendStatus {
+    REVOKED,
+    ACCEPTED,
+    DECLINED,
+    DELETED,
+    SENT,
+}
 class WebSocketResponses(){
     companion object {
         fun <T : Any>getAnnotation(data: KClass<T>):String{
@@ -33,14 +40,12 @@ class WebSocketResponses(){
         val edited: Boolean,
         val readBy: MutableList<Int>
     )
-    @Serializable
-    data class UnreadMessages(
-        val unreadAmount: Int,
-    )
+
     @Serializable
     @WsResponse("ALL_UNREAD_MESSAGES")
     data class ResAllUnreadMessages(
-        val messages: HashMap<Int,Int?>
+        val messages: HashMap<Int,Int?>,
+        val unreadAmount: HashMap<Int,Int>
     )
     @Serializable
     @WsResponse("USER_BLOCKED")
@@ -130,5 +135,17 @@ class WebSocketResponses(){
         val lastMessageId: Int,
         val groupId:Int,
         val userId: Int
+    )
+    @Serializable
+    @WsResponse("FRIEND_CHANGED")
+    data class FriendChanged(
+        val userId: Int,
+        val status: FriendStatus,
+        val initiatorId: Int
+    )
+    @Serializable
+    @WsResponse("USERS_INFO")
+    data class UsersInfo(
+        val users: HashMap<Int,UserInfoShort>
     )
 }

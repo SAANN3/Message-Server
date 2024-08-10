@@ -7,9 +7,11 @@ import WebsocketRequests
 import WebsocketResponse
 import WsRequest
 import WsResponse
+import com.example.DataClasses.UserInfoShort
 import com.example.types.User
 import io.ktor.server.plugins.*
 import io.ktor.server.websocket.*
+import io.ktor.util.*
 import io.ktor.websocket.*
 import io.ktor.websocket.serialization.*
 import kotlinx.coroutines.runBlocking
@@ -92,10 +94,12 @@ class UserWebsocket(
                 WebsocketRequests.getAnnotation(WebsocketRequests.GetLastReadMessages::class) -> {
                     val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.GetLastReadMessages>(text)
                     val unreadMessages:HashMap<Int,Int?> = hashMapOf()
+                    val unreadAmount: HashMap<Int,Int> = hashMapOf()
                     user.groups.forEach {
                         unreadMessages[it] = accessGroup(it).getLastReadMessage(user)?.id
+                        unreadAmount[it] = accessGroup(it).getUnreadAmount(user)
                     }
-                    sendOk(WebSocketResponses.ResAllUnreadMessages(unreadMessages))
+                    sendOk(WebSocketResponses.ResAllUnreadMessages(unreadMessages,unreadAmount))
                 }
                 WebsocketRequests.getAnnotation(WebsocketRequests.InviteUser::class) -> {
                     val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.InviteUser>(text)
@@ -149,6 +153,53 @@ class UserWebsocket(
                     val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.ReadMessage>(text)
                     accessGroup(type.groupId).readMessages(user,type.messageId)
                 }
+                WebsocketRequests.getAnnotation(WebsocketRequests.GetUsersInfo::class) -> {
+                    val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.GetUsersInfo>(text)
+                    val usersInfo:HashMap<Int,UserInfoShort> = hashMapOf()
+                    type.usersId.forEach {
+                        usersInfo[it] = User(it).serializeShort()
+                    }
+                    sendOk(WebSocketResponses.UsersInfo(usersInfo))
+                }
+                WebsocketRequests.getAnnotation(WebsocketRequests.AddFriend::class) -> {
+                    val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.AddFriend>(text)
+                    val friend = User(type.userId)
+                    user.friendsClass.addFriend(friend)
+                    val change = WebSocketResponses.FriendChanged(type.userId,FriendStatus.SENT,user.id)
+                    sendOk(change)
+                    GlobalInfo.users[type.userId]?.friendChanged(change)
+                }
+                WebsocketRequests.getAnnotation(WebsocketRequests.RemoveMyFriendInvite::class) -> {
+                    val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.RemoveMyFriendInvite>(text)
+                    user.friendsClass.removeInvite(User(type.userId))
+                    val change = WebSocketResponses.FriendChanged(type.userId,FriendStatus.REVOKED,user.id)
+                    sendOk(change)
+                    GlobalInfo.users[type.userId]?.friendChanged(change)
+                }
+                WebsocketRequests.getAnnotation(WebsocketRequests.RemoveFriend::class) -> {
+                    val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.RemoveFriend>(text)
+                    val friend = User(type.userId)
+                    user.friendsClass.removeFriend(friend)
+                    val change = WebSocketResponses.FriendChanged(type.userId,FriendStatus.DELETED,user.id)
+                    sendOk(change)
+                    GlobalInfo.users[type.userId]?.friendChanged(change)
+                }
+                WebsocketRequests.getAnnotation(WebsocketRequests.AcceptFriendRequest::class) -> {
+                    val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.AcceptFriendRequest>(text)
+                    val friend = User(type.userId)
+                    user.friendsClass.acceptFriend(friend)
+                    val change = WebSocketResponses.FriendChanged(type.userId,FriendStatus.ACCEPTED,user.id)
+                    sendOk(change)
+                    GlobalInfo.users[type.userId]?.friendChanged(change)
+                }
+                WebsocketRequests.getAnnotation(WebsocketRequests.DeclineFriendInvite::class) -> {
+                    val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.DeclineFriendInvite>(text)
+                    val friend = User(type.userId)
+                    user.friendsClass.declineInvite(friend)
+                    val change = WebSocketResponses.FriendChanged(type.userId,FriendStatus.DECLINED,user.id)
+                    sendOk(change)
+                    GlobalInfo.users[type.userId]?.friendChanged(change)
+                }
                 else -> {
                     sendErr(WebSocketResponses.BadRequest(),"Type [$typeName] not recognized")
                 }
@@ -158,6 +209,9 @@ class UserWebsocket(
         } catch (e: Exception) {
             sendErr(WebSocketResponses.BadRequest(),e.message)
         }
+    }
+    suspend fun friendChanged(change:WebSocketResponses.FriendChanged){
+        sendOk(change)
     }
     suspend fun newMessage(message:Message){
         sendOk(message.serialize())

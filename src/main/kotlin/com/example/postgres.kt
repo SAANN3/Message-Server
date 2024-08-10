@@ -91,8 +91,22 @@ object PostgresDb {
     }
     fun getIntList(query: String): MutableList<Int> {
         return getListOfSomething<Int>(query){ rs ->
-            rs.getInt(0)
+            rs.getInt(1)
         }
+    }
+    fun getInt(query: String): Int {
+        var number:Int = 0
+        transaction {
+            TransactionManager.current().exec(
+                query,
+                explicitStatementType = StatementType.SELECT
+            ) { rs ->
+                while(rs.next()) {
+                    number = rs.getInt(1)
+                }
+            }
+        }
+        return number;
     }
 
 }
