@@ -92,6 +92,14 @@ class WebSocketResponses(){
         val users: List<Int>,
         val name: String,
         val creationDate: Instant,
+        val groupId: Int,
+        val unreadAmount: Int,
+        val lastMessage: Message?
+    )
+    @Serializable
+    @WsResponse("GROUPS_INFO")
+    data class GroupsInfo(
+        val groups: MutableList<GroupInfo>
     )
     @Serializable
     @WsResponse("LOADED_MESSAGES")

@@ -88,14 +88,14 @@ returns  ```LOADED_MESSAGES``` response type
 }
 ```
 returns ```ALL_UNREAD_MESSAGES``` response type
-#### Get group info
+#### Get multiple groups info
 ```
 {
-    type: "GET_GROUP_INFO",
-    groupId: Number,
+    type: "GET_GROUPS_INFO",
+    groupId: Array<Number>, // ids of groups
 }
 ```
-returns  ```GROUP_INFO``` response type
+returns  ```GROUPS_INFO``` response type
 #### Unblock user
 ```
 {
@@ -336,8 +336,43 @@ returns to you and userid  ```FRIEND_CHANGED``` with status ```SENT```
     data: {
         users: Array<Number>,
         name: String,
-        creationDate: Date
+        creationDate: Date,
+        id: Number,
+        unreadAmount: Number,
+        lastMessage:{
+            id: Number, // id of the message
+            sender: Number, // id of user who sent message
+            groupId: Number,
+            text: String,
+            date: Date,
+            edited: Bool,
+            readBy: Array<Number> // id of users who read
+        }
     }
+}
+```
+#### Multiple Groups Info
+```
+{
+    status: "OK",
+    type: "GROUPS_INFO",
+    errorMessage: null,
+    data: Array<{
+        users: Array<Number>,
+        name: String,
+        creationDate: Date,
+        id: Number,
+        unreadAmount: Number,
+        lastMessage: {
+            id: Number, // id of the message
+            sender: Number, // id of user who sent message
+            groupId: Number,
+            text: String,
+            date: Date,
+            edited: Bool,
+            readBy: Array<Number> // id of users who read
+        } | null
+    }>
 }
 ```
 #### Loaded messages

@@ -52,6 +52,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-kotlin-datetime:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-json:$exposedVersion")
     implementation("io.github.smiley4:ktor-swagger-ui:3.2.0")
+    implementation ("io.ktor:ktor-server-content-negotiation")
     //implementation("org.jetbrains.exposed:exposed-money:$exposedVersion")
     //implementation("org.jetbrains.exposed:exposed-spring-boot-starter:$exposedVersion")
     testImplementation("io.ktor:ktor-server-tests-jvm")

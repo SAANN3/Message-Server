@@ -50,9 +50,9 @@ class WebsocketRequests(){
     class GetLastReadMessages()
 
     @Serializable
-    @WsRequest("GET_GROUP_INFO")
-    data class GetGroupInfo(
-        val groupId:Int,
+    @WsRequest("GET_GROUPS_INFO")
+    class GetGroupsInfo(
+        val groupsId:MutableList<Int>,
     )
     @Serializable
     @WsRequest("BLOCK_USER")

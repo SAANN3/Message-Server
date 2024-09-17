@@ -67,10 +67,13 @@ class UserWebsocket(
                     user.blockUser(type.userId)
                     sendOk(WebSocketResponses.BlockedUser(type.userId))
                 }
-                WebsocketRequests.getAnnotation(WebsocketRequests.GetGroupInfo::class) -> {
-                    val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.GetGroupInfo>(text)
-                    val group = accessGroup(type.groupId)
-                    sendOk(WebSocketResponses.GroupInfo(group.members,group.name,group.creationDate))
+                WebsocketRequests.getAnnotation(WebsocketRequests.GetGroupsInfo::class) -> {
+                    val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.GetGroupsInfo>(text)
+                    val groups: MutableList<WebSocketResponses.GroupInfo> = mutableListOf()
+                    type.groupsId.forEach {
+                        groups += accessGroup(it).getInfo(this.user)
+                    }
+                    sendOk(WebSocketResponses.GroupsInfo(groups))
                 }
                 WebsocketRequests.getAnnotation(WebsocketRequests.SendMessage::class) -> {
                     val type = GlobalInfo.Json.decodeFromString<WebsocketRequests.SendMessage>(text)

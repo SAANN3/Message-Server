@@ -1,5 +1,7 @@
 package com.example.types
 
+import WebSocketResponses
+import WebsocketRequests
 import WebsocketResponse
 import WsResponse
 import com.example.PostgresDb
@@ -17,6 +19,16 @@ class Group private  constructor(
     val members: MutableList<Int>,
     val creationDate: Instant,
 ){
+    fun getInfo(user:User): WebSocketResponses.GroupInfo {
+        return WebSocketResponses.GroupInfo(
+            members,
+            name,
+            creationDate,
+            id,
+            getUnreadAmount(user),
+            Message.castToResponseMessages(getLastMessages(1,0)).getOrNull(0)
+        )
+    }
     fun getUnreadAmount(user:User): Int{
         return PostgresDb.getInt(
             """
@@ -33,7 +45,7 @@ class Group private  constructor(
             """.trimIndent()
         )
     }
-    fun getLastMessages(amount:Int,offset:Int):MutableList<Message> {
+    fun getLastMessages(amount:Int,offset:Int = 0):MutableList<Message> {
         val messages = PostgresDb.getMessages(
             """
                 SELECT * FROM MESSAGES
